@@ -18,9 +18,6 @@ public class WeatherTartu {
     public Double airTemp;
     public Double windSpeed;
     public String phenomenon;
-
-
-
     public WeatherTartu(long wmoCode, Double airTemp, Double windSpeed, String Phenomenon, long timestamp) {
         this.WMO = wmoCode;
         this.airTemp = airTemp;

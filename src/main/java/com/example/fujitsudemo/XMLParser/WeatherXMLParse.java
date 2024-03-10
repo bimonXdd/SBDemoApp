@@ -21,7 +21,7 @@ public class WeatherXMLParse {
 
     private final String xmlLink;
 
-    private String city;
+    private String weatherStation;
     @Getter
     private Double windSpeed;
     @Getter
@@ -36,9 +36,9 @@ public class WeatherXMLParse {
 
     }
 
-    public WeatherXMLParse(String XmlLink ,String city) {
+    public WeatherXMLParse(String XmlLink ,String weatherStation) {
         this.xmlLink = XmlLink;
-        this.city = city;
+        this.weatherStation = weatherStation;
     }
 
 
@@ -59,7 +59,7 @@ public class WeatherXMLParse {
         for (int i = 0; i < stations.getLength(); i++) {
             Element station = (Element) stations.item(i);
 
-            if (getStationName(station).equals(city)) {
+            if (getStationName(station).equals(weatherStation)) {
                 this.WMOcode = Long.parseLong(extractWMOcode(station));
 
                 String windSpeedStr = extractAirTemp(station);
@@ -77,7 +77,7 @@ public class WeatherXMLParse {
                 return weatherInfo;
             }
         }
-        throw new RuntimeException("City not found: " +city);
+        throw new RuntimeException("City not found: " +weatherStation);
 
     }
 
