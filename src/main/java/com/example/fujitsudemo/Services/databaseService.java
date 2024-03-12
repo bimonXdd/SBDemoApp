@@ -2,9 +2,8 @@ package com.example.fujitsudemo.Services;
 
 import com.example.fujitsudemo.Repos.*;
 import com.example.fujitsudemo.XMLParser.WeatherXMLParse;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -14,48 +13,42 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RestController
 @EnableScheduling
 public class databaseService {
     @Autowired
-    WeatherRepoTartu weatherRepoTartu;
+    WeatherRepo weatherRepo;
+
     @Autowired
-    WeatherRepoTallinn weatherRepoTallinn;
-    @Autowired
-    WeatherRepoParnu weatherRepoParnu;
+    WeatherStationsRepo weatherStationsRepo;
 
     @Scheduled(cron ="${cronExpression}")
     @GetMapping(path ="/update")
-    public String updateDb() throws ParserConfigurationException, IOException, SAXException {
+    public String updateDb() throws ParserConfigurationException, IOException, SAXException, InterruptedException {
+        for (String station: new String[]{"Pärnu","Tartu-Tõravere","Tallinn-Harku"}){
+            WeatherXMLParse parser = retriveWeather(station);
+            WeatherEntity dbInfo = new WeatherEntity(new WeatherStationsEntity(parser.getWMOcode(),station),
+                    parser.getAirTemp(),
+                    parser.getWindSpeed(),
+                    parser.getWPhenomenon(),
+                    parser.getTimestamp());
 
-        WeatherXMLParse tartu = retriveWeather("Tartu-Tõravere");
-        WeatherTartu updateTartu = new WeatherTartu(tartu.getWMOcode(),
-                tartu.getAirTemp(),
-                tartu.getWindSpeed(),
-                tartu.getWPhenomenon(),
-                tartu.getTimestamp());
-
-        WeatherXMLParse tallinn = retriveWeather("Tallinn-Harku");
-        WeatherTallinn updateTallinn = new WeatherTallinn(tallinn.getWMOcode(),
-                tallinn.getAirTemp(),
-                tallinn.getWindSpeed(),
-                tallinn.getWPhenomenon(),
-                tallinn.getTimestamp());
-
-        WeatherXMLParse parnu = retriveWeather("Pärnu");
-        WeatherParnu updatePärnu = new WeatherParnu(parnu.getWMOcode(),
-                parnu.getAirTemp(),
-                parnu.getWindSpeed(),
-                parnu.getWPhenomenon(),
-                parnu.getTimestamp());
-
-        weatherRepoTartu.save(updateTartu);
-        weatherRepoTallinn.save(updateTallinn);
-        weatherRepoParnu.save(updatePärnu);
+            //With a fast for loop, the weatherRepo doest have time to save all, so a small timeout is needed
+            TimeUnit.SECONDS.sleep(1);
+            weatherRepo.save(dbInfo);
+        }
 
         return "The Database has been updated! ";
+    }
+    @PostConstruct
+    public void initStations(){
+        weatherStationsRepo.save(new WeatherStationsEntity(41803,"Pärnu"));
+        weatherStationsRepo.save(new WeatherStationsEntity(26038,"Tallinn-Harku"));
+        weatherStationsRepo.save(new WeatherStationsEntity(26242,"Tartu-Tõravere"));
     }
     public WeatherXMLParse retriveWeather(String Station) throws ParserConfigurationException, IOException, SAXException {
 
