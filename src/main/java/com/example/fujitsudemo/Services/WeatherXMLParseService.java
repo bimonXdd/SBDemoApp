@@ -1,4 +1,4 @@
-package com.example.fujitsudemo.XMLParser;
+package com.example.fujitsudemo.Services;
 
 
 import lombok.Data;
@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class WeatherXMLParse {
+public class WeatherXMLParseService {
 
     private final String xmlLink;
 
@@ -31,12 +31,12 @@ public class WeatherXMLParse {
     @Getter
     private long WMOcode;
 
-    public WeatherXMLParse(String XmlLink) {
+    public WeatherXMLParseService(String XmlLink) {
         this.xmlLink = XmlLink;
 
     }
 
-    public WeatherXMLParse(String XmlLink ,String weatherStation) {
+    public WeatherXMLParseService(String XmlLink , String weatherStation) {
         this.xmlLink = XmlLink;
         this.weatherStation = weatherStation;
     }

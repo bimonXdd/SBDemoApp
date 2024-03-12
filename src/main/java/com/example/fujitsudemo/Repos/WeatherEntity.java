@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 @Entity
 @Data
 @RequiredArgsConstructor
-@Table(name = "Weather Data")
+@Table(name = "Weather_Data")
 public class WeatherEntity {
 
     @ManyToOne
