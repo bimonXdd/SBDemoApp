@@ -86,7 +86,7 @@ public class weatherDAO {
         }
         return airTemp;
     }
-    public String getPhenomenon(String weatherStation){
+        public String getPhenomenon(String weatherStation){
         String phenomenon;
         try {
             phenomenon = jdbcTemplate.queryForObject(String.format("SELECT PHENOMENON FROM WEATHER_DATA " +
@@ -101,7 +101,7 @@ public class weatherDAO {
     public long getWMO(String weatherStation){
         long WMOCode;
         try{
-            WMOCode = jdbcTemplate.queryForObject("SELECT WMO FROM STATIONS WHERE STATION_NAME = " + weatherStation , Long.class);
+            WMOCode = jdbcTemplate.queryForObject(String.format("SELECT WMO FROM STATIONS WHERE STATION_NAME = %s", weatherStation) , Long.class);
         }catch (NullPointerException e){
             throw new RuntimeException("weatherstation WMO query returned NullPointer");
         }
