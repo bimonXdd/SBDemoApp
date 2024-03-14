@@ -3,7 +3,10 @@ package com.example.fujitsudemo.DAO;
 import com.example.fujitsudemo.Repos.*;
 import com.example.fujitsudemo.Services.WeatherXMLParseService;
 import jakarta.annotation.PostConstruct;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -14,6 +17,9 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -28,6 +34,7 @@ public class weatherDAO {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
 
     public weatherDAO() {
         this.jdbcTemplate = jdbcTemplate;
@@ -44,9 +51,11 @@ public class weatherDAO {
                     parser.getWPhenomenon(),
                     parser.getTimestamp());
 
+
+            weatherRepo.save(dbInfo);
             //With a fast for loop, the weatherRepo doest have time to save all, so a small timeout is needed
             TimeUnit.SECONDS.sleep(1);
-            weatherRepo.save(dbInfo);
+
         }
 
         return "The Database has been updated! ";
@@ -66,6 +75,7 @@ public class weatherDAO {
     }
     public double getWindSpeed(String weatherStation){
         double windSpeed;
+
         try {
              windSpeed = jdbcTemplate.queryForObject(String.format("SELECT WIND_SPEED FROM WEATHER_DATA " +
                      "  WHERE WMO = %d ORDER BY TIME_STAMP DESC LIMIT 1", getWMO(weatherStation)), Double.class);
@@ -73,10 +83,15 @@ public class weatherDAO {
         }catch (NullPointerException e){
             throw new RuntimeException("windSpeed query threw a NullPointer ");
         }
+        catch (EmptyResultDataAccessException e){
+            throw new RuntimeException("Empty result returned from DB query for Wind speed");
+        }
         return windSpeed;
     }
+
     public double getAirTemp(String weatherStation){
         double airTemp;
+
         try {
             airTemp = jdbcTemplate.queryForObject(String.format("SELECT AIR_TEMPERATURE FROM WEATHER_DATA " +
                     "  WHERE WMO = %d ORDER BY TIME_STAMP DESC LIMIT 1", getWMO(weatherStation)), Double.class);
@@ -84,8 +99,13 @@ public class weatherDAO {
         }catch (NullPointerException e){
             throw new RuntimeException("airTemp query threw a NullPointer ");
         }
+        catch (EmptyResultDataAccessException e){
+            throw new RuntimeException("Empty result returned from DB query for air temperature");
+        }
         return airTemp;
     }
+
+
         public String getPhenomenon(String weatherStation){
         String phenomenon;
         try {
@@ -94,17 +114,24 @@ public class weatherDAO {
 
         }catch (NullPointerException e){
             throw new RuntimeException("No phenomenon at current time");
+        }catch (EmptyResultDataAccessException e){
+            throw new RuntimeException("Empty result returned from DB query for phenomenon");
         }
         return phenomenon;
     }
 
-    public long getWMO(String weatherStation){
+    public Long getWMO(String weatherStation){
         long WMOCode;
         try{
+
             WMOCode = jdbcTemplate.queryForObject(String.format("SELECT WMO FROM STATIONS WHERE STATION_NAME = %s", weatherStation) , Long.class);
+
         }catch (NullPointerException e){
             throw new RuntimeException("weatherstation WMO query returned NullPointer");
+        } catch (EmptyResultDataAccessException e){
+            throw new RuntimeException("Empty result returned from DB query for WMO");
         }
         return WMOCode;
     }
+
 }

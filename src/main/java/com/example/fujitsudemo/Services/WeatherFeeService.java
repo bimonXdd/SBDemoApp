@@ -2,19 +2,22 @@ package com.example.fujitsudemo.Services;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 
 @Data
+@Service
 @RequiredArgsConstructor
 public class WeatherFeeService {
-    double windSpeed;
-    String phenomenon;
     String vehicleType;
 
 
     public WeatherFeeService(String vehicleType){
         this.vehicleType = vehicleType;
     }
-
 
 
 
@@ -33,7 +36,7 @@ public class WeatherFeeService {
 
     }
 
-    public double getWSEF() {
+    public double getWSEF(double windSpeed) {
         if (vehicleType.equals("Bike")){
             if (windSpeed > 10 && windSpeed <= 20) return 0.5;
 
@@ -46,18 +49,21 @@ public class WeatherFeeService {
 
     }
 
-    public double getWPEF() {
+    public double getWPEF(String phenomenon) {
         if (vehicleType.equals("Scooter") || vehicleType.equals("Bike")){
+            try{
+                if (checkSnow(phenomenon)) return 1;
+                else if (checkRain(phenomenon)) return 0.5;
+                else if (phenomenon.equals("glaze") || phenomenon.equals("hail") || phenomenon.equals("thunder")){
 
-            if (checkSnow()) return 1;
-            else if (checkRain()) return 0.5;
-            else if (phenomenon.equals("glaze") || phenomenon.equals("hail") || phenomenon.equals("thunder")){
-                //error
+            }}
+            catch (NullPointerException e){
+                return 0;
             }
         }
         return 0;
     }
-    private boolean checkSnow(){
+    private boolean checkSnow(String phenomenon){
         String condition = phenomenon.split(" ")[1];
 
         if (condition.equals("snow") || condition.equals("sleet") || condition.equals("snowfall")){
@@ -65,13 +71,17 @@ public class WeatherFeeService {
         }
         else return false;
     }
-    private boolean checkRain(){
+    private boolean checkRain(String phenomenon){
         String condition = phenomenon.split(" ")[1];
+
         if (condition.equals("rain") || condition.equals("shower")) {
             return true;
         }
         else return false;
     }
+
+
+
 
 
 

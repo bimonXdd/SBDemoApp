@@ -3,6 +3,7 @@ package com.example.fujitsudemo.Services;
 
 import lombok.Data;
 import lombok.Getter;
+import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -15,6 +16,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
+
 
 @Data
 public class WeatherXMLParseService {

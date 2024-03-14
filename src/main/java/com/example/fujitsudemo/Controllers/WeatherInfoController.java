@@ -14,6 +14,8 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 
@@ -30,65 +32,49 @@ public class WeatherInfoController {
     RegionalFeeService regionalFeeService;
 
 
-    @GetMapping(path = "/addWind")
-    public String sendWind() throws ParserConfigurationException, IOException, SAXException {
-
-
-        WeatherXMLParseService parser = new WeatherXMLParseService("https://www.ilmateenistus.ee/ilma_andmed/xml/observations.php?timestamp=1615381752", "Tartu-Tõravere");
-        parser.getWeatherInfo();
-
-        // WeatherEntity a = new WeatherEntity(new WeatherStations(parser.getWMOcode(),parser),parser.getAirTemp(),parser.getWindSpeed(),parser.getWPhenomenon(),parser.getTimestamp(), parser.getWeatherStation());
-        // WeatherEntity windObjectSaved =  weatherRepo.save(a);
-
-        return "sent : ";
-    }
-
-    @GetMapping(path = "/data")
-    public String getweatherInfo() {
-        String stationName = "'Tallinn-Harku'";
-        try {
-            double Wind = weatherDAO.getWindSpeed(stationName);
-            String phenomenon = weatherDAO.getPhenomenon(stationName);
-            double air = weatherDAO.getAirTemp(stationName);
-
-            return "Air: " + air + "Wind: " + Wind + " Phenomenon: " + phenomenon;
-        } catch (EmptyResultDataAccessException e) {
-            throw new RuntimeException("DB might be empty, threw a EmptyResultDataAccessException");
-        }
-
-    }
-
     @GetMapping(path = "/extraFee")
-    public String getExtraFee(@RequestParam("City")String city,
-                              @RequestParam("vehicleType") String vehicleType){
+    public String getExtraFee(@RequestParam("City") String city,
+                              @RequestParam("vehicleType") String vehicleType) {
+
         String stationName = "";
 
-        if (city.equals("Tallinn")) {
-            stationName = "'Tallinn-Harku'";
-        } else if (city.equals("Tartu")) {
-            stationName = "'Tartu-Tõravere'";
-        } else if (city.equals("Pärnu")) {
-            stationName = "'Pärnu'";
-        }
 
+        if (city.equals("Tallinn")) stationName = "'Tallinn-Harku'";
+
+        else if (city.equals("Tartu")) stationName = "'Tartu-Tõravere'";
+
+        else if (city.equals("Pärnu")) stationName = "'Pärnu'";
+
+
+        double airTemp = weatherDAO.getAirTemp(stationName);
         double windSpeed = weatherDAO.getWindSpeed(stationName);
+        String phenomenon = weatherDAO.getPhenomenon(stationName);
+
+        //Gives an error, if it's too windy for a bike ride
         if (vehicleType.equals("Bike") && windSpeed > 20) return "Usage of selected vehicle type is forbidden";
 
-        String phenomenon = weatherDAO.getPhenomenon(stationName);
+        //Gives an error, if the weather is thunder, hail or glaze
         if (vehicleType.equals("Bike") || vehicleType.equals("Scooter")) {
-            if (phenomenon.equals("thunder") || phenomenon.equals("hail") || phenomenon.equals("glaze")) {
-                return "Usage of selected vehicle type is forbidden";
+            if (phenomenon != null) {
+                if (phenomenon.equals("thunder") || phenomenon.equals("hail") || phenomenon.equals("glaze")) {
+                    return "Usage of selected vehicle type is forbidden";
+                }
             }
         }
 
-        double airTemp = weatherDAO.getAirTemp(stationName);
+
         WeatherFeeService fee = new WeatherFeeService(vehicleType);
-        double ATEF = fee.getATEF(windSpeed);
-        return "ATEF: " + ATEF + " RBF: " + regionalFeeService.getRBF(vehicleType, city);
+        double ATEF = fee.getATEF(airTemp);
+        double WPEF = fee.getWPEF(phenomenon);
+        double WSEF = fee.getWSEF(windSpeed);
+        double RBF = regionalFeeService.getRBF(vehicleType, city);
+        double feeSum = +ATEF + RBF + WPEF + WSEF;
+
+        return "ATEF + RBF + WPEF + WSEF = " + ATEF + " + " + RBF + " + " + WPEF + " + " + WSEF + " = " + feeSum ;
     }
 
-    @GetMapping(path = "/error")
-    public String errorPage(){
+    @GetMapping(path = "/extraFee/error")
+    public String errorPage() {
         return "An error has occurred, the Databse might be empty check terminal.";
     }
 
