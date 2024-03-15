@@ -3,7 +3,6 @@ package com.example.fujitsudemo.Services;
 
 import lombok.Data;
 import lombok.Getter;
-import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -17,8 +16,12 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-
-
+/**
+ * @Class WeatherXMLParseService
+ *
+ * @description Handles the parsing and xml scraping for the application
+ *
+ */
 @Data
 public class WeatherXMLParseService {
 
@@ -32,6 +35,8 @@ public class WeatherXMLParseService {
     @Getter
     private String WPhenomenon;
     @Getter
+    private long timeStamp;
+    @Getter
     private long WMOcode;
 
     public WeatherXMLParseService(String XmlLink) {
@@ -39,12 +44,13 @@ public class WeatherXMLParseService {
 
     }
 
-    public WeatherXMLParseService(String XmlLink , String weatherStation) {
+    public WeatherXMLParseService(String XmlLink, String weatherStation) {
         this.xmlLink = XmlLink;
         this.weatherStation = weatherStation;
     }
 
 
+    //prepares XML document for parsing
     private Document prepareXMLDoc() throws ParserConfigurationException, IOException, SAXException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
@@ -54,6 +60,14 @@ public class WeatherXMLParseService {
 
     //Return a list of windspeed, airtemp, and phenomenon(if excist) of the specified city
 
+    /**
+     * @return ATEF(Air Temperature Extra Fee)
+     * @throws ParserConfigurationException in case parser is configured incorrectly
+     * @throws IOException                  for input/output with extracting from XML
+     * @throws SAXException                 for XMLparser
+     * @Method getWeatherInfo
+     * @description extracts a list of airTemp, windSpeed and phenomenon(if excists)
+     */
     public List<String> getWeatherInfo() throws ParserConfigurationException, IOException, SAXException {
 
         //loop though all elements of xml file and find the city, then adds eveything to a list and returns it
@@ -66,28 +80,31 @@ public class WeatherXMLParseService {
                 this.WMOcode = Long.parseLong(extractWMOcode(station));
 
                 String windSpeedStr = extractAirTemp(station);
-                this.windSpeed =  windSpeedStr.isEmpty() ? Double.NaN : Double.parseDouble(windSpeedStr);
+                this.windSpeed = windSpeedStr.isEmpty() ? Double.NaN : Double.parseDouble(windSpeedStr);
                 weatherInfo.add(windSpeedStr);
 
                 String airTempStr = extractWindSP(station);
-
-                this.airTemp = airTempStr.isEmpty() ? Double.NaN : Double.parseDouble(airTempStr);;
+                this.airTemp = airTempStr.isEmpty() ? Double.NaN : Double.parseDouble(airTempStr);
+                ;
                 weatherInfo.add(airTempStr);
 
                 this.WPhenomenon = extractPhenom(station);
                 weatherInfo.add(WPhenomenon);
 
+                this.timeStamp = extractTimestamp();
+
                 return weatherInfo;
             }
         }
-        throw new RuntimeException("City not found: " +weatherStation);
+        throw new RuntimeException("WeatherStation was not found: " + weatherStation);
 
     }
 
 
     // Returns Timestamp(if exists) based on the link given
-    public long getTimestamp() throws ParserConfigurationException, IOException, SAXException {
+    private long extractTimestamp() throws ParserConfigurationException, IOException, SAXException {
         return Long.parseLong(prepareXMLDoc().getDocumentElement().getAttribute("timestamp"));
+
     }
 
     private String getStationName(Element station) {
@@ -102,7 +119,8 @@ public class WeatherXMLParseService {
         return station.getElementsByTagName("windspeed").item(0).getTextContent();
 
     }
-    private String extractWMOcode(Element station){
+
+    private String extractWMOcode(Element station) {
         return station.getElementsByTagName("wmocode").item(0).getTextContent();
     }
 
@@ -110,9 +128,9 @@ public class WeatherXMLParseService {
         String phenom = station.getElementsByTagName("phenomenon").item(0).getTextContent();
 
         //if there is a weather phenomenon
-        if (phenom.equals("")){
+        if (phenom.equals("")) {
             return null;
-        }else{
+        } else {
             return phenom;
         }
 

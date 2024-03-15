@@ -4,21 +4,20 @@ import com.example.fujitsudemo.Repos.*;
 import com.example.fujitsudemo.DAO.weatherDAO;
 import com.example.fujitsudemo.Services.RegionalFeeService;
 import com.example.fujitsudemo.Services.WeatherFeeService;
-import com.example.fujitsudemo.Services.WeatherXMLParseService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.xml.sax.SAXException;
-
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.List;
 
 
+/**
+ * @Class WeatherInfoController
+ *
+ * @description Controller for calculating the fees for the delivery app
+ *
+ * @AutowiredComponents WeatherRepo,weatherDAO,RegionalFeeService
+ *
+ */
 @RestController
 public class WeatherInfoController {
 
@@ -31,6 +30,14 @@ public class WeatherInfoController {
     @Autowired
     RegionalFeeService regionalFeeService;
 
+    /**
+     * Returns the fee calculation for food delivery app.
+     *
+     * @param city  String for the city the user chooses
+     * @param vehicleType String for the vehicle the user chooses
+     * @return Calculation for fee in form of a String
+     *
+     */
 
     @GetMapping(path = "/extraFee")
     public String getExtraFee(@RequestParam("City") String city,
@@ -38,7 +45,7 @@ public class WeatherInfoController {
 
         String stationName = "";
 
-
+        //City to station relation declaration
         if (city.equals("Tallinn")) stationName = "'Tallinn-Harku'";
 
         else if (city.equals("Tartu")) stationName = "'Tartu-Tõravere'";
@@ -46,9 +53,13 @@ public class WeatherInfoController {
         else if (city.equals("Pärnu")) stationName = "'Pärnu'";
 
 
+
+        //Gets the latest weather from DAO(Note: should probably be in weatherFeeService, but for now is here)
         double airTemp = weatherDAO.getAirTemp(stationName);
         double windSpeed = weatherDAO.getWindSpeed(stationName);
         String phenomenon = weatherDAO.getPhenomenon(stationName);
+
+
 
         //Gives an error, if it's too windy for a bike ride
         if (vehicleType.equals("Bike") && windSpeed > 20) return "Usage of selected vehicle type is forbidden";
@@ -63,19 +74,18 @@ public class WeatherInfoController {
         }
 
 
+        // Get all the required extra fees and calculate it
         WeatherFeeService fee = new WeatherFeeService(vehicleType);
-        double ATEF = fee.getATEF(airTemp);
-        double WPEF = fee.getWPEF(phenomenon);
-        double WSEF = fee.getWSEF(windSpeed);
-        double RBF = regionalFeeService.getRBF(vehicleType, city);
-        double feeSum = +ATEF + RBF + WPEF + WSEF;
+
+        double ATEF,WPEF,WSEF,RBF,feeSum;
+
+         ATEF = fee.getATEF(airTemp);
+         WPEF = fee.getWPEF(phenomenon);
+         WSEF = fee.getWSEF(windSpeed);
+         RBF = regionalFeeService.getRBF(vehicleType, city);
+         feeSum = +ATEF + RBF + WPEF + WSEF;
 
         return "ATEF + RBF + WPEF + WSEF = " + ATEF + " + " + RBF + " + " + WPEF + " + " + WSEF + " = " + feeSum ;
-    }
-
-    @GetMapping(path = "/extraFee/error")
-    public String errorPage() {
-        return "An error has occurred, the Databse might be empty check terminal.";
     }
 
 

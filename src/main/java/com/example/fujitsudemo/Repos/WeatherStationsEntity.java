@@ -7,6 +7,13 @@ import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
+/**
+ * @Class WeatherStationsEntity
+ *
+ * @description Entity object for db
+ *
+ */
 @Entity
 @Table(name = "Stations")
 @NoArgsConstructor
