@@ -40,7 +40,7 @@ public class WeatherFeeService {
 
                 if (airTemp < -10) return 1;
 
-                else if(airTemp > -10 && airTemp <= 0) return 0.5;
+                else if(airTemp >= -10 && airTemp <= 0) return 0.5;
 
                 else return 0;
             }
