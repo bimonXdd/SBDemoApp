@@ -1,4 +1,4 @@
-/* Apply Flexbox to the body to center the form */
+
 body {
     display: flex;
     justify-content: center; /* Center horizontally */
@@ -7,7 +7,7 @@ body {
     margin: 0; /* Remove default margin */
 }
 
-/* Style for the form */
+
 form {
     background-color: #f9f9f9;
     padding: 20px;
@@ -15,7 +15,7 @@ form {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Add padding between form elements */
+
 form input[type="text"],
 form input[type="email"],
 form textarea {
@@ -25,10 +25,10 @@ form textarea {
     margin-bottom: 10px;
     border: 1px solid #ccc;
     border-radius: 3px;
-    box-sizing: border-box; /* Include padding and border in element's total width */
+    box-sizing: border-box;
 }
 
-/* Add styling for the submit button */
+
 form button {
     background-color: #4CAF50;
     color: white;
@@ -38,7 +38,7 @@ form button {
     cursor: pointer;
 }
 
-/* Hover effect for the submit button */
+
 form button:hover {
     background-color: #45a049;
 }
@@ -49,12 +49,12 @@ select {
     padding-right: 25px; /* Add space for arrow icon */
 }
 
-/* Style the dropdown list */
+
 select::-ms-expand {
-    display: none; /* Remove default arrow in Internet Explorer */
+    display: none;
 }
 
-/* Example styling for the dropdown list options */
+
 select option {
     background-color: #f9f9f9;
     color: #333;

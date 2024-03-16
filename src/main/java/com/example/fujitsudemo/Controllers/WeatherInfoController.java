@@ -83,9 +83,8 @@ public class WeatherInfoController {
          RBF = regionalFeeService.getRBF(vehicleType, city);
          feeSum = +ATEF + RBF + WPEF + WSEF;
 
-        ExtraFee extraFee = new ExtraFee(1, city,vehicleType,RBF, WSEF, WPEF, ATEF, feeSum, null);
-
-        return extraFee ;
+         //finally return a json of the calculation
+        return new ExtraFee(1, city,vehicleType,RBF, WSEF, WPEF, ATEF, feeSum, null);
     }
 
 
