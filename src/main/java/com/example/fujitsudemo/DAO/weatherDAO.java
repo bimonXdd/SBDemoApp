@@ -83,7 +83,7 @@ public class weatherDAO {
      * WMOs and stationNames for: "Pärnu","Tartu-Tõravere","Tallinn-Harku"
      */
     @PostConstruct
-    public void initStations() {
+    private void initStations() {
         weatherStationsRepo.save(new WeatherStationsEntity(41803, "Pärnu"));
         weatherStationsRepo.save(new WeatherStationsEntity(26038, "Tallinn-Harku"));
         weatherStationsRepo.save(new WeatherStationsEntity(26242, "Tartu-Tõravere"));

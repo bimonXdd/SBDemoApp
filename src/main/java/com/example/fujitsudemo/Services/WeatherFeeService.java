@@ -67,7 +67,7 @@ public class WeatherFeeService {
      */
     public double getWSEF(double windSpeed) {
         try{if (vehicleType.equals("Bike")){
-            if (windSpeed > 10 && windSpeed <= 20) return 0.5;
+            if (windSpeed >= 10 && windSpeed <= 20) return 0.5;
         }
         }catch (NullPointerException e){
             return 0;
@@ -98,6 +98,8 @@ public class WeatherFeeService {
              }
             catch (NullPointerException e){
                 return 0;
+            }catch (ArrayIndexOutOfBoundsException e){
+                if (phenomenon.split(" ").length == 1) return 0;
             }
         }
         return 0;
@@ -105,22 +107,18 @@ public class WeatherFeeService {
 
     //check for snow realted phenomenons
     private boolean checkSnow(String phenomenon){
+        if (phenomenon == null) return false;
         String condition = phenomenon.split(" ")[1];
 
-        if (condition.equals("snow") || condition.equals("sleet") || condition.equals("snowfall")){
-            return true;
-        }
-        else return false;
+        return condition.equals("snow") || condition.equals("sleet") || condition.equals("snowfall");
     }
 
     //checks for rain related phenomenons
     private boolean checkRain(String phenomenon){
+        if (phenomenon == null) return false;
         String condition = phenomenon.split(" ")[1];
 
-        if (condition.equals("rain") || condition.equals("shower")) {
-            return true;
-        }
-        else return false;
+        return condition.equals("rain") || condition.equals("shower");
     }
 
 

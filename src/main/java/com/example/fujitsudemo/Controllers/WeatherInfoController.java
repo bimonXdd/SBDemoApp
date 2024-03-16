@@ -40,7 +40,7 @@ public class WeatherInfoController {
      */
 
     @GetMapping(path = "/extraFee")
-    public String getExtraFee(@RequestParam("City") String city,
+    public ExtraFee getExtraFee(@RequestParam("City") String city,
                               @RequestParam("vehicleType") String vehicleType) {
 
         String stationName = "";
@@ -53,22 +53,20 @@ public class WeatherInfoController {
         else if (city.equals("Pärnu")) stationName = "'Pärnu'";
 
 
-
         //Gets the latest weather from DAO(Note: should probably be in weatherFeeService, but for now is here)
         double airTemp = weatherDAO.getAirTemp(stationName);
         double windSpeed = weatherDAO.getWindSpeed(stationName);
         String phenomenon = weatherDAO.getPhenomenon(stationName);
 
 
-
         //Gives an error, if it's too windy for a bike ride
-        if (vehicleType.equals("Bike") && windSpeed > 20) return "Usage of selected vehicle type is forbidden";
+        if (vehicleType.equals("Bike") && windSpeed > 20) return new ExtraFee(1,city,vehicleType,null, null, null, null, null,  "Usage of selected vehicle type is forbidden");
 
         //Gives an error, if the weather is thunder, hail or glaze
         if (vehicleType.equals("Bike") || vehicleType.equals("Scooter")) {
             if (phenomenon != null) {
                 if (phenomenon.equals("thunder") || phenomenon.equals("hail") || phenomenon.equals("glaze")) {
-                    return "Usage of selected vehicle type is forbidden";
+                    return new ExtraFee(1,city,vehicleType,null, null, null, null, null,  "Usage of selected vehicle type is forbidden");
                 }
             }
         }
@@ -85,7 +83,9 @@ public class WeatherInfoController {
          RBF = regionalFeeService.getRBF(vehicleType, city);
          feeSum = +ATEF + RBF + WPEF + WSEF;
 
-        return "ATEF + RBF + WPEF + WSEF = " + ATEF + " + " + RBF + " + " + WPEF + " + " + WSEF + " = " + feeSum ;
+        ExtraFee extraFee = new ExtraFee(1, city,vehicleType,RBF, WSEF, WPEF, ATEF, feeSum, null);
+
+        return extraFee ;
     }
 
 
