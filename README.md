@@ -7,7 +7,7 @@
 
  ## About the project
   The project is a smaller part of a solution for a delivery type application. It calculates delivery fee extras based on the weather in Tallinn, Tartu and Pärnu and based on a vehicle type(Car, Scooter, Bike).
-  Weather data is taken from ![Estonias weather Station XML](https://www.ilmateenistus.ee/ilma_andmed/xml/observations.php) and inserted to an H2 database and regional base fee is determined before. The database gets
+  Weather data is taken from https://www.ilmateenistus.ee/ilma_andmed/xml/observations.php and inserted to an H2 database and regional base fee is determined before. The database gets
   new information (HH:15:00) so every hour on minute 15. The project contains documentation in form of javadoc and a few tests to test the services of the partial solution.
   
   - **The update rate is configurable via resources/application.properties as cronjob.**
